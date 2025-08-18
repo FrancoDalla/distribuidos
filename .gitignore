@@ -1,3 +1,7 @@
+*.ali
+*.adb
+
+
 # Prerequisites
 *.d
 
