@@ -1,0 +1,46 @@
+\documentclass{article}
+
+\author{Franco Dalla Gasperina}
+
+\title{Trabajo practico 1 - Programación distribuida y tiempo real}
+
+\date{agosto 2025}
+
+\begin{document}
+	\maketitle
+	
+	\section{Ejercicio 1}
+	1) Teniendo en cuenta la comunicación con sockets (puede usar tanto los
+	ejemplos provistos como también otras fuentes de información, que se sugiere
+	referenciar de manera explı́cita):
+	\begin{itemize}
+		\item a.- Identifique similitudes y diferencias entre los sockets en C y en Java.
+		\item b.- ¿Por qué puede decirse que los ejemplos no son representativos del
+		modelo c/s? Nota: corroborar con la clase donde se explica el modelo C/S.
+		\item c.- ¿Qué cambio/s deberı́an hacerse para que “cliente” provisto funcione
+		como “servidor” y el “servidor” provisto funcione como “cliente”? Nota:
+		corroborar con la clase donde se explica el modelo C/S.
+	\end{itemize}
+	
+	\section{Respuesta-1}
+	\subsection{a}
+		Las similitudes entre los sockets de C y Java son: 
+		\begin{itemize}
+			\item En ambos debe definirse si el socket utilizado sera para streams o datagramas.
+		\end{itemize}
+	
+		Las diferencias entre ambos son:
+		\begin{itemize}
+			\item Java es un lenguaje de alto nivel. Por lo que hay mucha más abstracción en la realización de conexiones con sockets en este lenguaje en comparación a C. Por esta razón en C se puede, por ejemplo, no realizar algunas.
+			\item en Java debe definirse el tipo de buffer (entrada o salida) a diferencia de C en el que no es necesario.
+		\end{itemize}
+	
+	\subsection{b}
+	Se discutió mucho al respecto sobre esto en las clases. La constante fue que no se cumplía el modelo c/s a causa de que el código que funciona como servidor es muy simple y no tiene en cuenta ciertas tareas que debería cumplir un servidor.
+	Tales como:
+	\begin{itemize}
+		\item Concurrencia. El servidor de ejemplo no puede manejar varios pedidos al mismo tiempo.
+		\item Escala. El servidor de ejemplo solo responde una vez y finaliza la ejecución.
+	\end{itemize}
+	
+\end{document}
