@@ -22,7 +22,7 @@
 		corroborar con la clase donde se explica el modelo C/S.
 	\end{itemize}
 	
-	\section{Respuesta-1}
+	\section*{Respuesta-1}
 	\subsection{a}
 		Las similitudes entre los sockets de C y Java son: 
 		\begin{itemize}
@@ -42,5 +42,12 @@
 		\item Concurrencia. El servidor de ejemplo no puede manejar varios pedidos al mismo tiempo.
 		\item Escala. El servidor de ejemplo solo responde una vez y finaliza la ejecución.
 	\end{itemize}
+	
+	\subsection{c}
+	En el lenguaje C.
+	cliente como servidor: Se necesitaría agregar bind, para asociar el socket creado a un puerto de la máquina. Además, en el cliente hay que poner listen, para que reciba una cantidad de conexiones entrantes y luego accept para cuando estas lleguen.
+	
+	Servidor como cliente: Esta es más sencilla. Ya que se deberían quitar algunas cosas como el bind a un puerto y la recepción como el listen y accept y agregar solo elementos para conocer al host y ya funcionaría como cliente.
+	
 	
 \end{document}
