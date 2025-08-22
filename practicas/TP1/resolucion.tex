@@ -10,44 +10,62 @@
 	\maketitle
 	
 	\section{Ejercicio 1}
-	1) Teniendo en cuenta la comunicación con sockets (puede usar tanto los
-	ejemplos provistos como también otras fuentes de información, que se sugiere
-	referenciar de manera explı́cita):
-	\begin{itemize}
-		\item a.- Identifique similitudes y diferencias entre los sockets en C y en Java.
-		\item b.- ¿Por qué puede decirse que los ejemplos no son representativos del
-		modelo c/s? Nota: corroborar con la clase donde se explica el modelo C/S.
-		\item c.- ¿Qué cambio/s deberı́an hacerse para que “cliente” provisto funcione
-		como “servidor” y el “servidor” provisto funcione como “cliente”? Nota:
-		corroborar con la clase donde se explica el modelo C/S.
-	\end{itemize}
-	
-	\section*{Respuesta-1}
-	\subsection{a}
-		Las similitudes entre los sockets de C y Java son: 
+		1) Teniendo en cuenta la comunicación con sockets (puede usar tanto los
+		ejemplos provistos como también otras fuentes de información, que se sugiere
+		referenciar de manera explı́cita):
 		\begin{itemize}
-			\item En ambos debe definirse si el socket utilizado sera para streams o datagramas.
+			\item a.- Identifique similitudes y diferencias entre los sockets en C y en Java.
+			\item b.- ¿Por qué puede decirse que los ejemplos no son representativos del
+			modelo c/s? Nota: corroborar con la clase donde se explica el modelo C/S.
+			\item c.- ¿Qué cambio/s deberı́an hacerse para que “cliente” provisto funcione
+			como “servidor” y el “servidor” provisto funcione como “cliente”? Nota:
+			corroborar con la clase donde se explica el modelo C/S.
 		\end{itemize}
-	
-		Las diferencias entre ambos son:
+		
+		\section*{Respuesta-1}
+		\subsection{a}
+			Las similitudes entre los sockets de C y Java son: 
+			\begin{itemize}
+				\item En ambos debe definirse si el socket utilizado sera para streams o datagramas.
+			\end{itemize}
+		
+			Las diferencias entre ambos son:
+			\begin{itemize}
+				\item Java es un lenguaje de alto nivel. Por lo que hay mucha más abstracción en la realización de conexiones con sockets en este lenguaje en comparación a C. Por esta razón en C se puede, por ejemplo, no realizar algunas.
+				\item en Java debe definirse el tipo de buffer (entrada o salida) a diferencia de C en el que no es necesario.
+			\end{itemize}
+		
+		\subsection{b}
+		Se discutió mucho al respecto sobre esto en las clases. La constante fue que no se cumplía el modelo c/s a causa de que el código que funciona como servidor es muy simple y no tiene en cuenta ciertas tareas que debería cumplir un servidor.
+		Tales como:
 		\begin{itemize}
-			\item Java es un lenguaje de alto nivel. Por lo que hay mucha más abstracción en la realización de conexiones con sockets en este lenguaje en comparación a C. Por esta razón en C se puede, por ejemplo, no realizar algunas.
-			\item en Java debe definirse el tipo de buffer (entrada o salida) a diferencia de C en el que no es necesario.
+			\item Concurrencia. El servidor de ejemplo no puede manejar varios pedidos al mismo tiempo.
+			\item Escala. El servidor de ejemplo solo responde una vez y finaliza la ejecución.
 		\end{itemize}
+		
+		\subsection{c}
+		En el lenguaje C.
+		cliente como servidor: Se necesitaría agregar bind, para asociar el socket creado a un puerto de la máquina. Además, en el cliente hay que poner listen, para que reciba una cantidad de conexiones entrantes y luego accept para cuando estas lleguen.
+		
+		Servidor como cliente: Esta es más sencilla. Ya que se deberían quitar algunas cosas como el bind a un puerto y la recepción como el listen y accept y agregar solo elementos para conocer al host y ya funcionaría como cliente.
 	
-	\subsection{b}
-	Se discutió mucho al respecto sobre esto en las clases. La constante fue que no se cumplía el modelo c/s a causa de que el código que funciona como servidor es muy simple y no tiene en cuenta ciertas tareas que debería cumplir un servidor.
-	Tales como:
-	\begin{itemize}
-		\item Concurrencia. El servidor de ejemplo no puede manejar varios pedidos al mismo tiempo.
-		\item Escala. El servidor de ejemplo solo responde una vez y finaliza la ejecución.
-	\end{itemize}
-	
-	\subsection{c}
-	En el lenguaje C.
-	cliente como servidor: Se necesitaría agregar bind, para asociar el socket creado a un puerto de la máquina. Además, en el cliente hay que poner listen, para que reciba una cantidad de conexiones entrantes y luego accept para cuando estas lleguen.
-	
-	Servidor como cliente: Esta es más sencilla. Ya que se deberían quitar algunas cosas como el bind a un puerto y la recepción como el listen y accept y agregar solo elementos para conocer al host y ya funcionaría como cliente.
-	
-	
+	\section{Ejercicio 2}
+		2) Desarrolle experimentos para quede claro que:
+		\begin{itemize}
+			\item a.- Aunque un proceso “servidor” programado en C haya obtenido un
+			socket y hecho un bind() no va a haber ningún otro proceso que pueda
+			hacer una conexión con él a menos que se haya hecho el listen() ¿Por qué
+			este mismo experimento no podrı́a hacerse programando en Java?
+			
+			\item b.- Un proceso “cliente” puede tener una conexión con el proceso “servidor” aunque el “servidor” no haya ejecutado la operación accept().
+		\end{itemize}
+		
+		\section*{Respuesta-2}
+		\subsection{a}
+			Esto es cierto. Ya que con la instrucción listen se determina la cantidad de conexiones esperadas en el socket. Si esta instrucción no se usara no podría llevarse a cabo la conexión.
+			En el caso de Java, la clase utilizada para las conexiones abstrae la tarea de la sentencia accept de C. Por lo que no podemos omitir este paso.
+		\subsection{b}
+		Creo que se puede. 
+			
+
 \end{document}

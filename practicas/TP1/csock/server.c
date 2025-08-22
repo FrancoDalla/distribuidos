@@ -56,9 +56,7 @@ int main(int argc, char *argv[])
 	 // SE BLOQUEA A ESPERAR UNA CONEXIÓN
      while(1){
      clilen = sizeof(cli_addr);
-     newsockfd = accept(sockfd, 
-                 (struct sockaddr *) &cli_addr, 
-                 &clilen);
+     //newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
 				 
      // DEVUELVE UN NUEVO DESCRIPTOR POR EL CUAL SE VAN A REALIZAR LAS COMUNICACIONES
 	 if (newsockfd < 0) 
