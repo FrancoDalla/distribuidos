@@ -21,6 +21,9 @@ Vagrant.configure("2") do |config|
 
         # The alias for ls
         grep -q "alias ls='ls -la'" /home/vagrant/.bashrc || echo -e "\\nalias ls='ls -la'" >> /home/vagrant/.bashrc
+	
+	#Testin
+	apt install git
       SHELL
     end
   end
