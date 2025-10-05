@@ -1,0 +1,13 @@
+!SESSION 2025-10-05 00:15:02.271 -----------------------------------------------
+eclipse.buildId=4.31.0.20240307-1200
+java.version=17.0.10
+java.vendor=Eclipse Adoptium
+BootLoader constants: OS=linux, ARCH=x86_64, WS=gtk, NL=es_AR
+Framework arguments:  -product org.eclipse.epp.package.java.product
+Command-line arguments:  -os linux -ws gtk -arch x86_64 -product org.eclipse.epp.package.java.product
+
+!ENTRY ch.qos.logback.classic 1 0 2025-10-05 00:15:08.376
+!MESSAGE Activated before the state location was initialized. Retry after the state location is initialized.
+
+!ENTRY ch.qos.logback.classic 1 0 2025-10-05 00:15:28.612
+!MESSAGE Logback config file: /home/juuzco/Documentos/distribuidos/practicas/TP3/laboratorio_google/grpc-hello-server/.metadata/.plugins/org.eclipse.m2e.logback/logback.2.6.0.20240217-1525.xml
