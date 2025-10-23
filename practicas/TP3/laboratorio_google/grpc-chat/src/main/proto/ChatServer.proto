@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+package com.example.grpc;
+
+message Message {
+	string author = 1;
+	string content = 2;
+}
+
+message ServerMessage {
+	google.protobuf.Timestamp timestamp = 1;
+	Message message = 2;
+}
+
+service ConnectionService{
+	rpc connection(Message) returns(ServerMessage);
+}
+
+
+
+service ChatService {
+	rpc chat(stream Message) returns (stream ServerMessage);
+}
+
