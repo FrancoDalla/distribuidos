@@ -1,79 +1,86 @@
 package com.example.grpc;
+import com.google.protobuf.Timestamp;
+import com.example.grpc.ChatServiceGrpc;
+import com.example.grpc.ChatServiceOuterClass;
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
+import io.grpc.stub.StreamObserver;
 
-import io.grpc.*;
-import io.grpc.stub.*;
+
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 public class Client {
-	public static void main(String[] args) throws Exception{
-		int intentos = 5;
-		int retryDelay = 1000;
-		
-		for(int intento = 1; intento <= intentos; intento++) {
-			if(connectToServer()) {
-				return;
-			}
-			if(intento < intentos) {
-				Thread.sleep(retryDelay);
-			}
-		}
-	}
-	
-	private static boolean connectToServer() {
-		final ManagedChannel channel = ManagedChannelBuilder.forTarget("localhost:8080")
-				.usePlaintext()
-				.build();
-		
-		final boolean[] success = {false};
-		final Object lock = new Object();
-		
-		try {
-			ConnectionServiceGrpc.ConnectionServiceStub stub = ConnectionServiceGrpc.newStub(channel);
-			
-			ChatServer.ConnectionRequest request = 
-					com.example.grpc.ChatServer.ConnectionRequest.newBuilder()
-						.setAuthor("carlos")
-						.build();
 
-			
-			stub.connection(request, new StreamObserver<ConnectionServiceOuterClass.connection>() {
-				public void onNext(ConnectionServiceOuterClass.ServerMessage serverMessage) {
-					System.out.println("Te conectaste: " + serverMessage);
-					success[0] = true;
-					synchronized (lock) {
-						lock.notifyAll();
-					}
-					channel.shutdown();
-				}
-				
-				public void onError(Throwable t) {
-					System.err.println("Error: "+ t.getMessage());
-					synchronized(lock) {
-						lock.notifyAll();
-					}
-				}
-				
-				public void onCompleted() {
-					success[0] = true;
-					synchronized(lock) {
-						lock.notifyAll();
-					}
-					channel.shutdownNow();
-				}
-			});
-			
-			synchronized(lock) {
-				try {
-					lock.wait(5000);
-				}catch (InterruptedException e) {
-					Thread.currentThread().interrupt();
-				}
-			}
-			
-			return success[0];
-		} finally {
-			if(!success[0]) {
-				channel.shutdownNow();
-			}
-		}
-	}
+    private static final String HOST = "localhost";
+    private static final int PORT = 9090;
+
+
+    public static void main(String[] args) {
+        launch(args);
+    }
+
+    @Override
+    public void start(Stage primaryStage) {
+
+        setupAndShowPrimaryStage(primaryStage);
+
+        // Create a channel
+        ManagedChannel channel = ManagedChannelBuilder.forAddress(HOST, PORT)
+                .usePlaintext()
+                .build();
+
+        // Create an async stub with the channel
+        ChatServiceGrpc.ChatServiceStub chatService = ChatServiceGrpc.newStub(channel);
+
+        // Open a connection to the server
+        StreamObserver<ChatServiceOuterClass.Message> chat =
+                chatService.sendChatMessage(new StreamObserver<ChatServiceOuterClass.ServerMessage>() {
+
+            // Handler for messages from the server
+            @Override
+            public void onNext(ChatServiceOuterClass.ServerMessage value) {
+                // Display the message
+            	
+            }
+
+            private LocalDateTime getMessageTimestampAsLocalDateTime(ChatServiceOuterClass.ServerMessage value) {
+                Timestamp timestamp = value.getTimestamp();
+                long timestampSeconds = timestamp.getSeconds();
+                Instant messageTimestampAsInstant = Instant.ofEpochSecond(timestampSeconds);
+                return LocalDateTime.ofInstant(messageTimestampAsInstant, ZoneOffset.UTC);
+            }
+
+
+            @Override
+            public void onError(Throwable t) {
+                System.out.println("Disconnected due to error: " + t.getMessage());
+            }
+
+            @Override
+            public void onCompleted() {
+                System.out.println("Disconnected");
+            }
+        });
+
+    private void setupAndShowPrimaryStage(Stage primaryStage) {
+        messagesView.setItems(messages);
+
+        send.setText("Send");
+
+        BorderPane pane = new BorderPane();
+        pane.setLeft(name);
+        pane.setCenter(message);
+        pane.setRight(send);
+
+        BorderPane root = new BorderPane();
+        root.setCenter(messagesView);
+        root.setBottom(pane);
+
+        primaryStage.setTitle("gRPC Chat");
+        primaryStage.setScene(new Scene(root, 480, 320));
+
+        primaryStage.show();
+    }
 }

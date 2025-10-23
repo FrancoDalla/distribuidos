@@ -13,13 +13,6 @@ message ServerMessage {
 	Message message = 2;
 }
 
-service ConnectionService{
-	rpc connection(Message) returns(ServerMessage);
-}
-
-
-
 service ChatService {
-	rpc chat(stream Message) returns (stream ServerMessage);
+	rpc SendChatMessage (stream Message) returns (stream ServerMessage);
 }
-
