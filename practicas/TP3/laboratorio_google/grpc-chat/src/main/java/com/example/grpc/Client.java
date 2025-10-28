@@ -10,77 +10,108 @@ import io.grpc.stub.StreamObserver;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.Scanner;
+import java.util.concurrent.CountDownLatch;
 
 public class Client {
-
-    private static final String HOST = "localhost";
-    private static final int PORT = 9090;
-
+    private ManagedChannel channel;
+    private StreamObserver<ChatServiceOuterClass.Message> chatObserver;
+    private final CountDownLatch finishLatch = new CountDownLatch(1);
+    private volatile boolean isConnected = true;
 
     public static void main(String[] args) {
-        launch(args);
+        new Client().start();
     }
 
-    @Override
-    public void start(Stage primaryStage) {
+    public void start() {
+        try {
+            // Configurar el canal gRPC
+            channel = ManagedChannelBuilder.forAddress("localhost", 9090)
+                    .usePlaintext()
+                    .build();
 
-        setupAndShowPrimaryStage(primaryStage);
+            // Crear el stub asíncrono
+            ChatServiceGrpc.ChatServiceStub chatService = ChatServiceGrpc.newStub(channel);
+            
+            System.out.println("Conectando al servidor de chat...");
+            System.out.println("Escribe 'exit' para salir");
 
-        // Create a channel
-        ManagedChannel channel = ManagedChannelBuilder.forAddress(HOST, PORT)
-                .usePlaintext()
-                .build();
+            // Solicitar nombre de usuario
+            Scanner scanner = new Scanner(System.in);
+            System.out.print("Ingresa tu nombre: ");
+            String userName = scanner.nextLine();
 
-        // Create an async stub with the channel
-        ChatServiceGrpc.ChatServiceStub chatService = ChatServiceGrpc.newStub(channel);
+            // Configurar el stream observer para recibir mensajes
+            chatObserver = chatService.chatServiceOuterClass(new StreamObserver<Chat.ChatMessageFromServer>() {
+                @Override
+                public void onNext(Chat.ChatMessageFromServer value) {
+                    // Mostrar mensajes entrantes en la consola
+                    System.out.println(value.getMessage().getFrom() + ": " + value.getMessage().getMessage());
+                }
 
-        // Open a connection to the server
-        StreamObserver<ChatServiceOuterClass.Message> chat =
-                chatService.sendChatMessage(new StreamObserver<ChatServiceOuterClass.ServerMessage>() {
+                @Override
+                public void onError(Throwable t) {
+                    System.err.println("Error en la conexión: " + t.getMessage());
+                    isConnected = false;
+                    finishLatch.countDown();
+                }
 
-            // Handler for messages from the server
-            @Override
-            public void onNext(ChatServiceOuterClass.ServerMessage value) {
-                // Display the message
-            	
+                @Override
+                public void onCompleted() {
+                    System.out.println("Conexión finalizada por el servidor");
+                    isConnected = false;
+                    finishLatch.countDown();
+                }
+            });
+
+            System.out.println("Conectado! Escribe tus mensajes:");
+
+            // Loop principal para enviar mensajes
+            while (isConnected) {
+                String input = scanner.nextLine();
+                
+                if ("exit".equalsIgnoreCase(input.trim())) {
+                    break;
+                }
+                
+                if (!input.trim().isEmpty() && isConnected) {
+                    Chat.ChatMessage message = Chat.ChatMessage.newBuilder()
+                            .setFrom(userName)
+                            .setMessage(input)
+                            .build();
+                    chatObserver.onNext(message);
+                }
             }
 
-            private LocalDateTime getMessageTimestampAsLocalDateTime(ChatServiceOuterClass.ServerMessage value) {
-                Timestamp timestamp = value.getTimestamp();
-                long timestampSeconds = timestamp.getSeconds();
-                Instant messageTimestampAsInstant = Instant.ofEpochSecond(timestampSeconds);
-                return LocalDateTime.ofInstant(messageTimestampAsInstant, ZoneOffset.UTC);
+        } catch (Exception e) {
+            System.err.println("Error: " + e.getMessage());
+        } finally {
+            shutdown();
+        }
+    }
+
+    private void shutdown() {
+        System.out.println("Desconectando...");
+        
+        if (chatObserver != null) {
+            chatObserver.onCompleted();
+        }
+        
+        if (channel != null) {
+            channel.shutdown();
+            try {
+                if (!channel.awaitTermination(5, TimeUnit.SECONDS)) {
+                    channel.shutdownNow();
+                }
+            } catch (InterruptedException e) {
+                channel.shutdownNow();
+                Thread.currentThread().interrupt();
             }
-
-
-            @Override
-            public void onError(Throwable t) {
-                System.out.println("Disconnected due to error: " + t.getMessage());
-            }
-
-            @Override
-            public void onCompleted() {
-                System.out.println("Disconnected");
-            }
-        });
-
-    private void setupAndShowPrimaryStage(Stage primaryStage) {
-        messagesView.setItems(messages);
-
-        send.setText("Send");
-
-        BorderPane pane = new BorderPane();
-        pane.setLeft(name);
-        pane.setCenter(message);
-        pane.setRight(send);
-
-        BorderPane root = new BorderPane();
-        root.setCenter(messagesView);
-        root.setBottom(pane);
-
-        primaryStage.setTitle("gRPC Chat");
-        primaryStage.setScene(new Scene(root, 480, 320));
-
-        primaryStage.show();
+        }
+        
+        finishLatch.countDown();
+        System.out.println("Cliente cerrado");
     }
 }
+
+
